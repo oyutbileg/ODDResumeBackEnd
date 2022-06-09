@@ -7,7 +7,9 @@ const Op = Sequelize.Op;
 // SignUp Function
 exports.signup = asyncHandler(async (req, res) => {
   await req.db.sysUser.create(req.body);
-  responseHandler(res, {})
+  responseHandler(res, {
+    data: {}
+  })
 });
 
 // SignIn Function
@@ -28,7 +30,7 @@ exports.signin = asyncHandler(async (req, res) => {
     });
 
   if (!user) {
-    throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу.", 401);
+    throw new MyError("Бүртгэлгүй хэрэглэгч!", 401);
   }
 
   const ok = await user.checkPassword(password, user);
@@ -44,8 +46,7 @@ exports.signin = asyncHandler(async (req, res) => {
     refresh: credentials.refresh,
     user: {
       name: user.first_name,
-      email: user.email,
-      is_admin: user.is_admin,
+      email: user.email
     },
   });
 });
