@@ -4,12 +4,10 @@ const responseHandler = require("../utils/responseHandler");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
-exports.index = asyncHandler(async (req, res, next) => {
-  const tags = await req.db.skillTag.findAll({ attributes: ['tag'] });
+exports.getAll = asyncHandler(async (req, res, next) => {
+  const tags = await req.db.skillTag.findAll({ attributes: ['id', 'tag'] });
   responseHandler(res, {
-    data: {
-      tags
-    }
+    data: tags
   })
 });
 

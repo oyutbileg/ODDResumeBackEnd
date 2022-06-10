@@ -38,6 +38,10 @@ let SysUser = sequelize.define('sys_user', {
         type: Sequelize.STRING,
         defaultValue: null
     },
+    position: {
+        type: Sequelize.STRING,
+        defaultValue: null
+    },
     email: {
         type: Sequelize.STRING,
         unique: true,
@@ -65,13 +69,25 @@ let SysUser = sequelize.define('sys_user', {
         type: Sequelize.STRING,
         defaultValue: null
     },
-    profile_path: {
+    photo: {
         type: Sequelize.STRING,
         defaultValue: null
+    },
+    experience: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
     },
     is_admin: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+    },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
+    portfolio_id: {
+        type: Sequelize.UUID,
+        defaultValue: null
     },
     remember_token: {
         type: Sequelize.STRING,
@@ -117,43 +133,24 @@ let SkillTag = sequelize.define('skill_tag', {
     timestamps: false
 });
 
-let Experience = sequelize.define('experience', {
-    company_name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    position: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    start_date: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-    },
-    end_date: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-    },
-    created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-    },
-    modified_at: {
-        type: Sequelize.DATE,
-        defaultValue: null
-    }
-}, {
-    sequelize,
-    tableName: 'experience',
-    timestamps: false
-});
-
 let Project = sequelize.define('project', {
     project_name: {
         type: Sequelize.STRING,
         allowNull: false,
     },
     description: {
+        type: Sequelize.STRING,
+        defaultValue: null
+    },
+    appstore_url: {
+        type: Sequelize.STRING,
+        defaultValue: null
+    },
+    playstore_url: {
+        type: Sequelize.STRING,
+        defaultValue: null
+    },
+    web_url: {
         type: Sequelize.STRING,
         defaultValue: null
     },
@@ -171,52 +168,14 @@ let Project = sequelize.define('project', {
     timestamps: false
 });
 
-let ProjectUrl = sequelize.define('project_url', {
-    path: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-            isUrl: true,
-        }
-    },
-    type: {
-        type: Sequelize.ENUM('web', 'playstore', 'appstore'),
-        defaultValue: 'web'
-    },
-    created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW
-    },
-    modified_at: {
-        type: Sequelize.DATE,
-        defaultValue: null
-    }
-}, {
-    sequelize,
-    tableName: 'project_url',
-    timestamps: false
-});
-
 //#region [Project with SysUser]
 SysUser.hasMany(Project)
 Project.belongsTo(SysUser, { as: 'sysUser' })
 // #endregion
 
-//#region [Experience with SysUser]
-SysUser.hasMany(Experience)
-Experience.belongsTo(SysUser, { as: 'sysUser' })
-// #endregion
-
-//#region [Experience with SysUser]
-Project.hasMany(ProjectUrl)
-ProjectUrl.belongsTo(Project, { as: 'project' })
-// #endregion
-
 db.sysUser = SysUser;
 db.skillTag = SkillTag;
-db.experience = Experience
 db.project = Project;
-db.projectUrl = ProjectUrl;
 
 db.sequelize = sequelize;
 
@@ -228,14 +187,13 @@ db.sysUser.prototype.getJWT = function (obj) {
 };
 
 const tokenGenerate = (obj, type = true) => {
-    return jwt.sign({ id: obj.id, name: obj.name, is_admin: obj.is_admin ? 'true' : 'false' }, process.env.JWT_SECRET, {
+    return jwt.sign({ id: obj.id, name: obj.name, is_admin: obj.is_admin ? 'true' : 'false', is_active: obj.is_active }, process.env.JWT_SECRET, {
         expiresIn: type ? process.env.JWT_LOGIN_EXPIRESIN : process.env.JWT_REFRESH_EXPIRESIN,
     });
 }
 
 db.sysUser.prototype.checkPassword = async function (enteredPassword, obj) {
-    const res = await bcrypt.compare(enteredPassword, obj.password);
-    return res;
+    return await bcrypt.compare(enteredPassword, obj.password);
 };
 
 module.exports = db;

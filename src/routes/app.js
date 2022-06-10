@@ -1,8 +1,11 @@
 const express = require('express');
-const { alive } = require('../controller/app');
+const { alive, getPortfolio, getUsers } = require('../controller/app');
 
 const router = express.Router();
 
-router.route('/').get(alive);
+// api/v1
+router.route('/alive').get(alive);
+router.route('/users').get(getUsers);
+router.route('/portfolio/:portfolioId/').get(getPortfolio);
 
 module.exports = router;

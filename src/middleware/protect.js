@@ -5,7 +5,7 @@ const MyError = require("../utils/myerror");
 exports.protect = asyncHandler(async (req, res, next) => {
     if (!req.headers.authorization) {
         throw new MyError(
-            "Уучлаарай та хандах эрхгүй байна. Та эхлээд логин хийнэ үү.",
+            "Oops!, maybe you have to login.",
             401
         );
     }
@@ -13,34 +13,29 @@ exports.protect = asyncHandler(async (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
 
     if (!token) {
-        throw new MyError("Токен байхгүй байна. Та эхлээд логин хийнэ үү.", 401);
+        throw new MyError("You haven't credentials, you have to login", 401);
     }
-    // let tokenObj;
-    // try {
+
     const tokenObj = jwt.verify(token, process.env.JWT_SECRET);
-    // } catch (e) {
 
-    // }
-
-    if (tokenObj.active !== "active") {
+    if (!tokenObj.is_active) {
         throw new MyError(
-            "Уучлаарай таны эрх хязгаарлагдсан байна. Админтай холбоо барина уу.",
+            "Oops!, your account is not active. Please contact with admin.",
             400
         );
     }
 
     req.userId = tokenObj.id;
     req.is_admin = tokenObj.is_admin;
-    req.active = tokenObj.active;
+    req.is_active = tokenObj.is_active;
 
     next();
 });
 
-
 exports.authorize = () => {
     return (req, res, next) => {
         if (req.is_admin === "false") {
-            throw new MyError("Таны эрх энэ үйлдлийг гүйцэтгэхэд хүрэлцэхгүй!", 403);
+            throw new MyError("Oops!, maybe you need permission.", 403);
         }
         next();
     };

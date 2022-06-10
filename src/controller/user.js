@@ -1,167 +1,98 @@
 const MyError = require("../utils/myerror");
+const path = require("path");
 const asyncHandler = require("express-async-handler");
-const paginate = require("../utils/paginate-sequelize");
-const Sequelize = require("sequelize");
 const responseHandler = require("../utils/responseHandler");
-const Op = Sequelize.Op;
 const bcrypt = require('bcrypt');
-const { fileUpload } = require("../utils/fileUpload");
-
-// register
-exports.register = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.create(req.body);
-  responseHandler(res, {
-    user: user,
-  })
-});
-
-exports.login = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw new MyError("Имэйл болон нууц үгээ дамжуулна уу.", 404);
-  }
-
-  const user = await req.db.user
-    .findOne({
-      where: {
-        email: {
-          [Op.eq]: email,
-        },
-      },
-    });
-
-  if (!user) {
-    throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу.", 401);
-  }
-
-  const ok = await user.checkPassword(password, user);
-
-  if (!ok) {
-    throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу.", 401);
-  }
-
-  if (user.active !== "active") {
-    throw new MyError(
-      "Уучлаарай таны эрх хязгаарлагдсан байна. Админтай холбоо барина уу.",
-      400
-    );
-  }
-
-  const credentials = user.getJWT(user);
-
-  responseHandler(res, {
-    token: credentials.token,
-    refresh: credentials.refresh,
-    user: {
-      name: user.name,
-      email: user.email,
-      is_admin: user.is_admin,
-    },
-  });
-});
-
-exports.getUsers = asyncHandler(async (req, res, next) => {
-  const page = parseInt(req.query.page) || Constants.DEFAULT_PAGE;
-  const limit = parseInt(req.query.limit) || Constants.DEFAULT_LIMIT;
-  const sort = req.query.sort;
-  let select = req.query.select;
-
-  if (select) {
-    select = select.split(" ");
-  }
-
-  ["select", "sort", "page", "limit"].forEach((el) => delete req.query[el]);
-
-  const pagination = await paginate(page, limit, req.db.user);
-
-  let query = { offset: pagination.start - 1, limit };
-
-  if (req.query) {
-    query.where = req.query;
-  }
-
-  if (select) {
-    query.attributes = select;
-  }
-
-  if (sort) {
-    query.order = sort
-      .split(" ")
-      .map((el) => [
-        el.charAt(0) === "-" ? el.substring(1) : el,
-        el.charAt(0) === "-" ? "DESC" : "ASC",
-      ]);
-  }
-
-  const users = await req.db.user.findAll(query);
-
-  responseHandler(res, {
-    data: users,
-    pagination,
-  })
-});
 
 exports.me = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.findByPk(req.userId);
+  let select = req.query.select;
+  if (select) {
+    select = select.split("");
+  }
+
+  const user = await req.db.sysUser.findByPk(req.userId, select ? { attributes: select } : {});
 
   if (!user) {
     throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
   }
 
+  delete user.password;
+
   responseHandler(res, {
-    data: {
-      name: user.name,
+    data: !select ? {
+      name: user.first_name,
       email: user.email,
       is_admin: user.is_admin,
-      active: user.active
+    } : user
+  })
+});
+
+exports.update = asyncHandler(async (req, res, next) => {
+  const user = await req.db.sysUser.findByPk(req.userId);
+
+  if (!user) {
+    throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
+  }
+
+  req.body.modified_at = new Date();
+  await user.update({ ...req.body });
+
+  responseHandler(res, {
+    data: {
+      name: user.first_name,
+      email: user.email,
+      is_admin: user.is_admin,
+      description: user.description,
+      photo: user.photo
     }
   })
 });
 
-exports.blockUser = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.update(req.body, {
-    where: {
-      id: {
-        [Op.eq]: req.params.id,
-      },
-    },
-  });
+exports.uploadPhoto = asyncHandler(async (req, res, next) => {
+  const user = await req.db.sysUser.findByPk(req.userId);
 
   if (!user) {
-    throw new MyError(req.params.id + " ID-тэй хэрэглэгч байхгүй.", 400);
+    throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
   }
 
-  responseHandler(res, {
-    data: user,
-  })
-});
-
-exports.deleteUser = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.findByPk(req.body.id);
-
-  if (!user) {
-    throw new MyError(
-      req.body.id + " ID-тэй хэрэглэгч байхгүй байна.",
-      404
-    );
+  if (!req.files || Object.keys(req.files).length === 0) {
+    throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
 
-  if (!user.id === 1) {
-    user.destroy();
-  } else {
-    throw new MyError("Админ хэрэглэгч устгах боломжгүй.",
-      404
-    );
+  const file = req.files['file']
+  // const file = req.files.file;
+
+  if (!file.mimetype.startsWith("image")) {
+    throw new MyError("Та зураг upload хийнэ үү.", 400);
   }
 
-  responseHandler(res, {
-    data: user,
+  if (file.size > process.env.MAX_UPLOAD_FILE_SIZE) {
+    throw new MyError("Таны зурагны хэмжээ хэтэрсэн байна.", 400);
+  }
+
+  file.name = `photo_${req.userId}${path.parse(file.name).ext}`;
+
+  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, (err) => {
+    if (err) {
+      throw new MyError(
+        "Файлыг хуулах явцад алдаа гарлаа. Алдаа : " + err.message,
+      );
+    }
+
+    user.photo = file.name;
+    user.save();
+
+    responseHandler(res, {
+      data: {
+        photo: user.photo
+      }
+    });
   });
 });
 
-exports.resetPassword = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.findByPk(req.body.id);
+// Need Encryption 
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const user = await req.db.sysUser.findByPk(req.body.id);
 
   if (!user) {
     throw new MyError(
@@ -183,35 +114,4 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   responseHandler(res, {
     data: user,
   });
-});
-
-exports.uploadProfile = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.findByPk(req.userId);
-
-  if (!user) {
-    throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
-  }
-
-  const file = req.files['file']
-
-  const result = await fileUpload(file, req.body.prefix + '/' + req.userId)
-
-  user.profile_path = result.key
-  await user.save();
-
-  responseHandler(res, {
-    data: {
-      path: result.key
-    }
-  })
-});
-
-exports.getUser = asyncHandler(async (req, res, next) => {
-  const user = await req.db.user.findByPk(req.userId);
-
-  if (!user) {
-    throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
-  }
-
-  responseHandler(res, { profile_path: user.profile_path })
 });

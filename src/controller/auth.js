@@ -3,9 +3,12 @@ const asyncHandler = require("express-async-handler");
 const Sequelize = require("sequelize");
 const responseHandler = require("../utils/responseHandler");
 const Op = Sequelize.Op;
+const uuid = require('uuid')
 
 // SignUp Function
 exports.signup = asyncHandler(async (req, res) => {
+  req.body.portfolio_id = uuid.v4();
+  req.body.password = 'mobicom1';
   await req.db.sysUser.create(req.body);
   responseHandler(res, {
     data: {}
@@ -17,7 +20,7 @@ exports.signin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new MyError("Имэйл болон нууц үгээ дамжуулна уу.", 404);
+    throw new MyError("Please enter email and password!", 404);
   }
 
   const user = await req.db.sysUser
@@ -30,7 +33,7 @@ exports.signin = asyncHandler(async (req, res) => {
     });
 
   if (!user) {
-    throw new MyError("Бүртгэлгүй хэрэглэгч!", 401);
+    throw new MyError("User Not Found!", 401);
   }
 
   const ok = await user.checkPassword(password, user);

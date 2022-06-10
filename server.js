@@ -6,6 +6,9 @@ const cors = require("cors");
 const morgan = require("morgan");
 const rfs = require("rotating-file-stream");
 const fileupload = require('express-fileupload');
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
 
 // Custom
 const errorHandler = require("./src/middleware/error");
@@ -31,7 +34,7 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "src/log"),
 });
 
-const whitelist = ["http://localhost:3000", "http://localhost:4000", "https://lsknow.ml", "http://lsknow.ml"];
+const whitelist = ["http://localhost:3000", "http://localhost:9001", "https://lsknow.ml", "http://lsknow.ml"];
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
@@ -42,15 +45,27 @@ const corsOptionsDelegate = function (req, callback) {
   callback(null, corsOptions) // callback expects two parameters: error and options
 }
 
-app.use('/public', express.static('public'))
+// Express rate limit : Дуудалтын тоог хязгаарлана
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 100 requests per windowMs
+  message: "15 минутанд 3 удаа л хандаж болно! ",
+});
+
+app.use(express.static('public'))
+app.use(limiter);
 app.use(cors(corsOptionsDelegate));
-app.use(fileupload());
+app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
+// Клиент вэб аппуудыг мөрдөх ёстой нууцлал хамгаалалтыг http header ашиглан зааж өгнө
+app.use(helmet());
+// клиент сайтаас ирэх Cross site scripting халдлагаас хамгаална
+app.use(xss());
 app.use(injectDb(db));
 app.use(morgan("combined", { stream: accessLogStream }));
-app.use(errorHandler);
 restServer.applyMiddleWare(app, '/api/v1')
+app.use(errorHandler);
 
 // Моделиудаас базыг үүсгэнэ (хэрэв үүсээгүй бол)
 db.sequelize
@@ -60,13 +75,15 @@ db.sequelize
   })
   .catch((err) => console.log(err));
 
+// express сэрвэрийг асаана.
 const server = app.listen(
   process.env.PORT,
-  console.log(`express server...${process.env.PORT} дээр аслаа.`)
+  console.log(`🚀 RESTful API is now running on http://localhost:${process.env.PORT}/api/v1`)
 );
 
-process.on("unhandledRejection", (err, _) => {
-  console.log(`Алдаа гарлаа: ${err.message}`);
+// Баригдалгүй цацагдсан бүх алдаануудыг энд барьж авна
+process.on("unhandledRejection", (err, promise) => {
+  console.log(`Алдаа гарлаа : ${err.message}`.underline.red.bold);
   server.close(() => {
     process.exit(1);
   });
