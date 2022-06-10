@@ -17,7 +17,11 @@ exports.adminRole = asyncHandler(async (req, res, next) => {
     throw new MyError(req.params.id + " user not found.", 400);
   }
 
-  await user.update(req.body);
+  if (user.id !== 1) {
+    await user.update(req.body);
+  } else {
+    throw new MyError("This action isn't allowed for root user.", 404);
+  }
 
   responseHandler(res, {
     data: {},
