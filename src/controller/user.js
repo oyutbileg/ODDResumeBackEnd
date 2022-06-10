@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 exports.me = asyncHandler(async (req, res, next) => {
   let select = req.query.select;
   if (select) {
-    select = select.split("");
+    select = select.split(" ");
   }
 
   const user = await req.db.sysUser.findByPk(req.userId, select ? { attributes: select } : {});

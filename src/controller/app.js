@@ -31,8 +31,17 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
   let query = { offset: pagination.start - 1, limit };
 
   if (Array.isArray(select)) {
-    select.remove("password");
-    query.attributes = select;
+    query.attributes = select.filter((e) => e !== "password");
+  } else {
+    query.attributes = [
+      'first_name',
+      'last_name',
+      'email',
+      'experience',
+      'position',
+      'photo',
+      'portfolio_id'
+    ]
   }
 
   if (sort) {
@@ -43,16 +52,6 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
         el.charAt(0) === "-" ? "DESC" : "ASC",
       ]);
   }
-
-  query.attributes = select ? select : [
-    'first_name',
-    'last_name',
-    'email',
-    'experience',
-    'position',
-    'photo',
-    'portfolio_id'
-  ]
 
   const users = await req.db.sysUser.findAll({
     ...query
