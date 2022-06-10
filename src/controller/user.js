@@ -90,19 +90,18 @@ exports.uploadPhoto = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Need Encryption 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const user = await req.db.sysUser.findByPk(req.body.id);
 
   if (!user) {
     throw new MyError(
-      req.body.id + " ID-тэй хэрэглэгч байхгүй байна.",
+      req.body.id + " User not found",
       404
     );
   }
 
   if (!req.body.password) {
-    throw new MyError("Нууц үг оруулна уу.",
+    throw new MyError("Please enter a new password!",
       404
     );
   }

@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(protect);
 router.route("/").put(update);
 router.route("/me").get(me);
-router.route("/password").post(changePassword);
+router.route("/change-password").post(changePassword);
 router.route("/upload-photo").put(uploadPhoto);
 
 module.exports = router;
