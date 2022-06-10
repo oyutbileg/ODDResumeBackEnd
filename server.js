@@ -2,31 +2,26 @@ const express = require("express");
 const dotenv = require("dotenv");
 const path = require("path");
 const cors = require("cors");
-// third party packages
 const morgan = require("morgan");
 const rfs = require("rotating-file-stream");
 const fileupload = require('express-fileupload');
 const helmet = require("helmet");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 
-// Custom
 const errorHandler = require("./src/middleware/error");
-
-// Midllewares
 const logger = require("./src/middleware/logger");
 const injectDb = require("./src/middleware/injectDb");
 
-// Routes
 const restServer = require("./src/routes");
 
 dotenv.config({
   path: "./config.local.env",
 });
 
-// Sequelize with any database тэй ажиллах обьект
 const db = require("./src/config/db-seq");
-
 const app = express();
 
 var accessLogStream = rfs.createStream("access.log", {
@@ -34,18 +29,18 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "src/log"),
 });
 
-const whitelist = ["http://localhost:3000", "http://localhost:9001", "https://lsknow.ml", "http://lsknow.ml"];
+const whitelist = ["http://localhost:3000", "http://localhost:9001"];
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
+    corsOptions = { origin: true }
   } else {
-    corsOptions = { origin: false } // disable CORS for this request
+    corsOptions = { origin: false }
   }
-  callback(null, corsOptions) // callback expects two parameters: error and options
+  callback(null, corsOptions)
 }
 
-// Express rate limit : Дуудалтын тоог хязгаарлана
+// Express rate limit
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 500, // limit each IP to 100 requests per windowMs
@@ -54,13 +49,13 @@ const limiter = rateLimit({
 
 app.use(express.static('public'))
 app.use(limiter);
+app.use(hpp());
+app.use(cookieParser());
 app.use(cors(corsOptionsDelegate));
 app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
-// Клиент вэб аппуудыг мөрдөх ёстой нууцлал хамгаалалтыг http header ашиглан зааж өгнө
 app.use(helmet());
-// клиент сайтаас ирэх Cross site scripting халдлагаас хамгаална
 app.use(xss());
 app.use(injectDb(db));
 app.use(morgan("combined", { stream: accessLogStream }));
