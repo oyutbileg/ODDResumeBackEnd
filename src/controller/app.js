@@ -3,6 +3,7 @@ const responseHandler = require("../utils/responseHandler");
 const paginate = require("../utils/paginate-sequelize");
 const Sequelize = require("sequelize");
 const Constants = require("../constants/constants");
+const arrayRemoveElement = require("../utils/removePassword");
 const Op = Sequelize.Op;
 
 // Greeting Function
@@ -31,7 +32,7 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
   let query = { offset: pagination.start - 1, limit };
 
   if (Array.isArray(select)) {
-    query.attributes = select.filter((e) => e !== "password");
+    query.attributes = arrayRemoveElement(select, "password");
   } else {
     query.attributes = [
       'first_name',

@@ -3,6 +3,7 @@ const path = require("path");
 const asyncHandler = require("express-async-handler");
 const responseHandler = require("../utils/responseHandler");
 const bcrypt = require('bcrypt');
+const arrayRemoveElement = require("../utils/removePassword");
 
 exports.me = asyncHandler(async (req, res, next) => {
   let select = req.query.select;
@@ -10,13 +11,15 @@ exports.me = asyncHandler(async (req, res, next) => {
     select = select.split(" ");
   }
 
+  if (Array.isArray(select)) {
+    select = arrayRemoveElement(select, "password");
+  }
+
   const user = await req.db.sysUser.findByPk(req.userId, select ? { attributes: select } : {});
 
   if (!user) {
-    throw new MyError(req.userId + " ID-тэй хэрэглэгч байхгүй!", 400);
+    throw new MyError(req.userId + " User not found!", 400);
   }
-
-  delete user.password;
 
   responseHandler(res, {
     data: !select ? {
