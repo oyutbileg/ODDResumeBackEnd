@@ -103,15 +103,21 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (!req.body.password) {
-    throw new MyError("Please enter a new password!",
+  if (!req.body.password && !req.body.old_password) {
+    throw new MyError("Please enter a password!",
       404
     );
   }
 
+  const ok = await user.checkPassword(req.body.old_password, user);
+
+  if (!ok) {
+    throw new MyError("!Oops, old password don't match.", 401);
+  }
+
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(req.body.password, salt);
-  await user.save()
+  await user.save({ attributes: ['first_name'] });
 
   responseHandler(res, {
     data: user,
