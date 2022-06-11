@@ -6,7 +6,7 @@ const Constants = require("../constants/constants");
 const Op = Sequelize.Op;
 const paginate = require("../utils/paginate-sequelize");
 
-exports.index = asyncHandler(async (req, res, next) => {
+exports.index = asyncHandler(async (req, res, _next) => {
   const page = parseInt(req.query.page) || Constants.DEFAULT_PAGE;
   const limit = parseInt(req.query.limit) || Constants.DEFAULT_LIMIT;
   const sort = req.query.sort;
@@ -51,7 +51,7 @@ exports.index = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.create = asyncHandler(async (req, res, next) => {
+exports.create = asyncHandler(async (req, res, _next) => {
   req.body.sysUserId = req.userId;
   const project = await req.db.project.create(req.body, { attributes: ['project_name'] });
   responseHandler(res, {
@@ -59,7 +59,7 @@ exports.create = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.update = asyncHandler(async (req, res, next) => {
+exports.update = asyncHandler(async (req, res, _next) => {
   req.body.sysUserId = req.userId;
   const project = await req.db.project.findOne({
     where: {
@@ -92,7 +92,7 @@ exports.update = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.destroy = asyncHandler(async (req, res, next) => {
+exports.destroy = asyncHandler(async (req, res, _next) => {
   const project = await req.db.project.findOne({
     where: {
       [Op.and]: [

@@ -4,7 +4,7 @@ const responseHandler = require("../utils/responseHandler");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
-exports.getAll = asyncHandler(async (req, res, next) => {
+exports.getAll = asyncHandler(async (req, res, _next) => {
   const tags = await req.db.skillTag.findAll({
     order: [
       ['created_at', 'DESC'],
@@ -16,14 +16,14 @@ exports.getAll = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.create = asyncHandler(async (req, res, next) => {
+exports.create = asyncHandler(async (req, res, _next) => {
   const tag = await req.db.skillTag.create(req.body);
   responseHandler(res, {
     data: tag
   })
 });
 
-exports.update = asyncHandler(async (req, res, next) => {
+exports.update = asyncHandler(async (req, res, _next) => {
   const tag = await req.db.skillTag.findOne({
     where: {
       id: {
@@ -44,7 +44,7 @@ exports.update = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.destroy = asyncHandler(async (req, res, next) => {
+exports.destroy = asyncHandler(async (req, res, _next) => {
   const tag = await req.db.skillTag.findOne({
     where: {
       id: {

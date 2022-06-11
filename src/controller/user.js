@@ -5,7 +5,7 @@ const responseHandler = require("../utils/responseHandler");
 const bcrypt = require('bcrypt');
 const arrayRemoveElement = require("../utils/removePassword");
 
-exports.me = asyncHandler(async (req, res, next) => {
+exports.me = asyncHandler(async (req, res, _next) => {
   let select = req.query.select;
   if (select) {
     select = select.split(" ");
@@ -30,7 +30,7 @@ exports.me = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.update = asyncHandler(async (req, res, next) => {
+exports.update = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findByPk(req.userId);
 
   if (!user) {
@@ -51,7 +51,7 @@ exports.update = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.uploadPhoto = asyncHandler(async (req, res, next) => {
+exports.uploadPhoto = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findByPk(req.userId);
 
   if (!user) {
@@ -63,7 +63,6 @@ exports.uploadPhoto = asyncHandler(async (req, res, next) => {
   }
 
   const file = req.files['file']
-  // const file = req.files.file;
 
   if (!file.mimetype.startsWith("image")) {
     throw new MyError("Та зураг upload хийнэ үү.", 400);
@@ -93,7 +92,7 @@ exports.uploadPhoto = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.changePassword = asyncHandler(async (req, res, next) => {
+exports.changePassword = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findByPk(req.body.id);
 
   if (!user) {
