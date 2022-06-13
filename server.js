@@ -77,7 +77,7 @@ const server = app.listen(
 );
 
 // Баригдалгүй цацагдсан бүх алдаануудыг энд барьж авна
-process.on("unhandledRejection", (err, promise) => {
+process.on("unhandledRejection", (err, _promise) => {
   console.log(`Алдаа гарлаа : ${err.message}`.underline.red.bold);
   server.close(() => {
     process.exit(1);
