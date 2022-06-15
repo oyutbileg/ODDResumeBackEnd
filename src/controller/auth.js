@@ -4,6 +4,7 @@ const Sequelize = require("sequelize");
 const responseHandler = require("../utils/responseHandler");
 const Op = Sequelize.Op;
 const uuid = require('uuid')
+const bcrypt = require("bcrypt");
 
 // SignUp Function
 exports.signup = asyncHandler(async (req, res) => {
@@ -52,4 +53,34 @@ exports.signin = asyncHandler(async (req, res) => {
       email: user.email
     },
   });
+});
+
+exports.siteSignIn = asyncHandler(async (req, res) => {
+  const { site_password } = req.body;
+
+  if (!site_password) {
+    throw new MyError("Please enter password!", 404);
+  }
+
+  const config = await req.db.config.findByPk(1);
+
+  const ok = await bcrypt.compare(site_password, config.site_password);
+  if (!ok) {
+    throw new MyError("Check your password!.", 401);
+  }
+
+  const { token } = config.getJWT();
+
+  responseHandler(res, {
+    token,
+    isLoggin: true
+  });
+});
+
+exports.me = asyncHandler(async (_req, res, _next) => {
+  responseHandler(res, {
+    data: {
+      isLoggin: true
+    }
+  })
 });

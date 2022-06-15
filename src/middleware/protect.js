@@ -2,10 +2,10 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("./asyncHandler");
 const MyError = require("../utils/myerror");
 
-exports.protect = asyncHandler(async (req, res, next) => {
+exports.protect = asyncHandler(async (req, _res, next) => {
     if (!req.headers.authorization) {
         throw new MyError(
-            "Oops!, maybe you have to login.",
+            "Oops, maybe you have to login!.",
             401
         );
     }
@@ -32,8 +32,25 @@ exports.protect = asyncHandler(async (req, res, next) => {
     next();
 });
 
+exports.siteProtect = asyncHandler(async (req, _res, next) => {
+    if (!req.headers.authorization) {
+        throw new MyError(
+            "Oops, maybe you have to login!.",
+            401
+        );
+    }
+
+    const token = req.headers.authorization.split(" ")[1];
+
+    if (!token) {
+        throw new MyError("You haven't credentials, you have to login", 401);
+    }
+
+    next();
+});
+
 exports.authorize = () => {
-    return (req, res, next) => {
+    return (req, _res, next) => {
         if (req.is_admin === "false") {
             throw new MyError("Oops!, maybe you need permission.", 403);
         }

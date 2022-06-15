@@ -7,7 +7,7 @@ const arrayRemoveElement = require("../utils/removePassword");
 const Op = Sequelize.Op;
 
 // Greeting Function
-exports.alive = asyncHandler(async (req, res) => {
+exports.alive = asyncHandler(async (_req, res) => {
   responseHandler(res, {
     data: {
       'greetings': '🚀 Hello! Keep going, Good Luck!'
@@ -15,7 +15,7 @@ exports.alive = asyncHandler(async (req, res) => {
   });
 });
 
-exports.getUsers = asyncHandler(async (req, res, next) => {
+exports.getUsers = asyncHandler(async (req, res, _next) => {
   const page = parseInt(req.query.page) || Constants.DEFAULT_PAGE;
   const limit = parseInt(req.query.limit) || Constants.DEFAULT_LIMIT;
   const sort = req.query.sort;
@@ -65,7 +65,7 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.getPortfolio = asyncHandler(async (req, res, next) => {
+exports.getPortfolio = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findOne({
     where: {
       portfolio_id: {

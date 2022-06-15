@@ -4,7 +4,7 @@ const Sequelize = require("sequelize");
 const responseHandler = require("../utils/responseHandler");
 const Op = Sequelize.Op;
 
-exports.adminRole = asyncHandler(async (req, res, next) => {
+exports.adminRole = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findOne({
     where: {
       id: {
@@ -28,7 +28,7 @@ exports.adminRole = asyncHandler(async (req, res, next) => {
   })
 });
 
-exports.deleteUser = asyncHandler(async (req, res, next) => {
+exports.deleteUser = asyncHandler(async (req, res, _next) => {
   const user = await req.db.sysUser.findByPk(req.params.id);
 
   if (!user) {
@@ -47,4 +47,11 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
   responseHandler(res, {
     data: {}
   });
+});
+
+exports.createConfig = asyncHandler(async (req, res, _next) => {
+  await req.db.config.create(req.body);
+  responseHandler(res, {
+    data: {}
+  })
 });

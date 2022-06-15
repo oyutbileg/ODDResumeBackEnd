@@ -168,11 +168,39 @@ let Project = sequelize.define('project', {
     timestamps: false
 });
 
+
+let Config = sequelize.define('config', {
+    site_password: {
+        type: Sequelize.STRING,
+        allowNull: null,
+    },
+    is_reparing: {
+        type: Sequelize.BOOLEAN,
+        allowNull: null,
+        defaultValue: false,
+    },
+    created_at: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    },
+}, {
+    sequelize,
+    tableName: 'config',
+    timestamps: false,
+    hooks: {
+        beforeCreate: async function (config) {
+            const salt = await bcrypt.genSalt(10);
+            return config.site_password = await bcrypt.hash(config.site_password, salt);
+        }
+    }
+});
+
 //#region [Project with SysUser]
 SysUser.hasMany(Project)
 Project.belongsTo(SysUser, { as: 'sysUser' })
 // #endregion
 
+db.config = Config;
 db.sysUser = SysUser;
 db.skillTag = SkillTag;
 db.project = Project;
@@ -189,6 +217,18 @@ db.sysUser.prototype.getJWT = function (obj) {
 const tokenGenerate = (obj, type = true) => {
     return jwt.sign({ id: obj.id, name: obj.name, is_admin: obj.is_admin ? 'true' : 'false', is_active: obj.is_active }, process.env.JWT_SECRET, {
         expiresIn: type ? process.env.JWT_LOGIN_EXPIRESIN : process.env.JWT_REFRESH_EXPIRESIN,
+    });
+}
+
+db.config.prototype.getJWT = function () {
+    return {
+        token: siteToken(),
+    }
+};
+
+const siteToken = () => {
+    return jwt.sign({ secret: '#_#' }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_LOGIN_EXPIRESIN
     });
 }
 
