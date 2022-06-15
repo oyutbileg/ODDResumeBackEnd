@@ -29,7 +29,7 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "src/log"),
 });
 
-const whitelist = ["http://localhost:3000", "http://localhost:4000", "https://resume-ecru-rho.vercel.app"];
+const whitelist = ["http://localhost:3000", "http://localhost:4000", "http://13.212.177.120", "https://outsourcing.mobicom.mn/"];
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
