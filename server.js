@@ -29,7 +29,7 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "src/log"),
 });
 
-const whitelist = ["http://localhost:3000", "http://localhost:4000", "http://13.212.177.120", "https://outsourcing.mobicom.mn/"];
+const whitelist = ["http://localhost:3000", "http://localhost:4000", "http://13.212.177.120", "https://outsourcing.mobicom.mn"];
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
@@ -49,14 +49,14 @@ const limiter = rateLimit({
 
 app.use(express.static('public'))
 app.use(limiter);
-// app.use(hpp());
-// app.use(cookieParser());
+app.use(hpp());
+app.use(cookieParser());
 app.use(cors(corsOptionsDelegate));
 app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
-// app.use(helmet());
-// app.use(xss());
+app.use(helmet());
+app.use(xss());
 app.use(injectDb(db));
 app.use(morgan("combined", { stream: accessLogStream }));
 restServer.applyMiddleWare(app, '/api/v1')
