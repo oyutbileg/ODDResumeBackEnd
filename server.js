@@ -49,14 +49,14 @@ const limiter = rateLimit({
 
 app.use(express.static('public'))
 app.use(limiter);
-app.use(hpp());
-app.use(cookieParser());
+// app.use(hpp());
+// app.use(cookieParser());
 app.use(cors(corsOptionsDelegate));
 app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
-app.use(helmet());
-app.use(xss());
+// app.use(helmet());
+// app.use(xss());
 app.use(injectDb(db));
 app.use(morgan("combined", { stream: accessLogStream }));
 restServer.applyMiddleWare(app, '/api/v1')
