@@ -1,5 +1,4 @@
 const express = require('express');
-const { route } = require('express/lib/application');
 const { adminRole, deleteUser, createConfig, changeConfigPassword } = require('../controller/admin');
 const { protect, authorize } = require('../middleware/protect');
 
