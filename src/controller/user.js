@@ -138,7 +138,7 @@ exports.changeOrder = asyncHandler(async (req, res, _next) => {
   const user_with_number = await req.db.sysUser.findOne({
     where: {
       list_order: {
-        [Op.eq]: req.body.order_number
+        [Op.eq]: req.body.list_order
       },
     },
   });
@@ -147,7 +147,7 @@ exports.changeOrder = asyncHandler(async (req, res, _next) => {
     await user_with_number.update({ list_order: Number(user.list_order) });
   }
 
-  await user.update({ list_order: Number(req.body.order_number) });
+  await user.update({ list_order: Number(req.body.list_order) });
 
   responseHandler(res, {
     data: {}
