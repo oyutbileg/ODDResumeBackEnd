@@ -4,6 +4,8 @@ const asyncHandler = require("express-async-handler");
 const responseHandler = require("../utils/responseHandler");
 const bcrypt = require('bcrypt');
 const arrayRemoveElement = require("../utils/removePassword");
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 
 exports.me = asyncHandler(async (req, res, _next) => {
   let select = req.query.select;
@@ -120,5 +122,34 @@ exports.changePassword = asyncHandler(async (req, res, _next) => {
 
   responseHandler(res, {
     data: user,
+  });
+});
+
+exports.changeOrder = asyncHandler(async (req, res, _next) => {
+  const user = await req.db.sysUser.findByPk(req.body.id);
+
+  if (!user) {
+    throw new MyError(
+      req.body.id + " user not found.",
+      404
+    );
+  }
+
+  const user_with_number = await req.db.sysUser.findOne({
+    where: {
+      list_order: {
+        [Op.eq]: req.body.order_number
+      },
+    },
+  });
+
+  if (user_with_number) {
+    await user_with_number.update({ list_order: Number(user.list_order) });
+  }
+
+  await user.update({ list_order: Number(req.body.order_number) });
+
+  responseHandler(res, {
+    data: {}
   });
 });
