@@ -42,9 +42,9 @@ const corsOptionsDelegate = function (req, callback) {
 
 // Express rate limit
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 5 * 60 * 1000, // 15 minutes
   max: 500, // limit each IP to 100 requests per windowMs
-  message: "15 минутанд 3 удаа л хандаж болно! ",
+  message: "5 минутанд 3 удаа л хандаж болно!",
 });
 
 app.use(express.static('public'))
