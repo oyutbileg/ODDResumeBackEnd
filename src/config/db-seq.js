@@ -77,6 +77,11 @@ let SysUser = sequelize.define('sys_user', {
         type: Sequelize.INTEGER,
         defaultValue: 0
     },
+    list_order: {
+        defaultValue: 0,
+        allowNull: false,
+        type: Sequelize.INTEGER
+    },
     is_admin: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
@@ -109,6 +114,11 @@ let SysUser = sequelize.define('sys_user', {
         beforeCreate: async function (user) {
             const salt = await bcrypt.genSalt(10);
             return user.password = await bcrypt.hash(user.password, salt);
+        },
+        afterCreate: async function (user) {
+            await user.update({
+                list_order: user.id
+            })
         }
     }
 });
