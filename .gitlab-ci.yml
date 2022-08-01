@@ -6,9 +6,8 @@ run_docker:
     - master
   stage: run
   script:
-    - echo "$SEQUELIZE_DATABASE"
     - docker build -t resumeapi .
     - docker ps --quiet --filter="name=resumeapi" | xargs --no-run-if-empty docker rm -f
-    - docker run -d -e SEQUELIZE_DATABASE=resume --network=host --restart always --name resumeapi resumeapi
+    - docker run -d -e SEQUELIZE_DATABASE=$SEQUELIZE_DATABASE -e SEQUELIZE_USERNAME=$SEQUELIZE_USERNAME -e SEQUELIZE_PASSWORD=$SEQUELIZE_PASSWORD -e SEQUELIZE_HOST=$SEQUELIZE_HOST -e SEQUELIZE_PORT=$SEQUELIZE_PORT -e SEQUELIZE_DIALECT=$SEQUELIZE_DIALECT --network=host --restart always --name resumeapi resumeapi
   tags:
     - master-runner
