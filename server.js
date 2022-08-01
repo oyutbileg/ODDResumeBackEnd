@@ -33,6 +33,7 @@ const whitelist = [
   "http://localhost:3000",
   "http://localhost:4000",
   "http://13.212.177.120",
+  "http://139.162.50.43",
   "https://outsourcing.mobicom.mn",
   "https://resume-dusky-psi.vercel.app",
 ];
