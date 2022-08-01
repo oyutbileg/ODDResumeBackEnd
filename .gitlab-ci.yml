@@ -6,8 +6,8 @@ run_docker:
     - master
   stage: run
   script:
-    - sudo docker build -t resumeapi .
-    - sudo docker ps --quiet --filter="name=resumeapi" | xargs --no-run-if-empty docker rm -f
-    - sudo docker run -dt -p 9000:9000 --restart always --name resumeapi resumeapi
+    - docker build -t resumeapi .
+    - docker ps --quiet --filter="name=resumeapi" | xargs --no-run-if-empty docker rm -f
+    - docker run -dt -p 9000:9000 --restart always --name resumeapi resumeapi
   tags:
     - master-runner
