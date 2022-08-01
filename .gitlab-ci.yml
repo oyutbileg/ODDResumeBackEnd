@@ -8,6 +8,12 @@ run_docker:
   script:
     - docker build -t resumeapi .
     - docker ps --quiet --filter="name=resumeapi" | xargs --no-run-if-empty docker rm -f
-    - docker run -d -e SEQUELIZE_DATABASE=$SEQUELIZE_DATABASE -e SEQUELIZE_USERNAME=$SEQUELIZE_USERNAME -e SEQUELIZE_PASSWORD=$SEQUELIZE_PASSWORD -e SEQUELIZE_HOST=$SEQUELIZE_HOST -e SEQUELIZE_PORT=$SEQUELIZE_PORT -e SEQUELIZE_DIALECT=$SEQUELIZE_DIALECT --network=host --restart always --name resumeapi resumeapi
+    - docker run -d
+      -e SEQUELIZE_DATABASE=$SEQUELIZE_DATABASE -e SEQUELIZE_USERNAME=$SEQUELIZE_USERNAME
+      -e SEQUELIZE_PASSWORD=$SEQUELIZE_PASSWORD -e SEQUELIZE_HOST=$SEQUELIZE_HOST -e SEQUELIZE_PORT=$SEQUELIZE_PORT
+      -e SEQUELIZE_DIALECT=$SEQUELIZE_DIALECT -e NODE_ENV=$NODE_ENV -e PORT=$PORT -e JWT_SECRET=$JWT_SECRET
+      -e JWT_LOGIN_EXPIRESIN=$JWT_LOGIN_EXPIRESIN -e JWT_REFRESH_EXPIRESIN=$JWT_REFRESH_EXPIRESIN
+      -e MAX_UPLOAD_FILE_SIZE=$MAX_UPLOAD_FILE_SIZE -e FILE_UPLOAD_PATH=$FILE_UPLOAD_PATH
+      --network=host --restart always --name resumeapi resumeapi
   tags:
     - master-runner
