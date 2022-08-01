@@ -4,7 +4,7 @@ const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
 const rfs = require("rotating-file-stream");
-const fileupload = require('express-fileupload');
+const fileupload = require("express-fileupload");
 const helmet = require("helmet");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
@@ -17,9 +17,9 @@ const injectDb = require("./src/middleware/injectDb");
 
 const restServer = require("./src/routes");
 
-dotenv.config({
-  path: "./config.env",
-});
+// dotenv.config({
+//   path: "./config.env",
+// });
 
 const db = require("./src/config/db-seq");
 const app = express();
@@ -29,16 +29,22 @@ var accessLogStream = rfs.createStream("access.log", {
   path: path.join(__dirname, "src/log"),
 });
 
-const whitelist = ["http://localhost:3000", "http://localhost:4000", "http://13.212.177.120", "https://outsourcing.mobicom.mn", "https://resume-dusky-psi.vercel.app"];
+const whitelist = [
+  "http://localhost:3000",
+  "http://localhost:4000",
+  "http://13.212.177.120",
+  "https://outsourcing.mobicom.mn",
+  "https://resume-dusky-psi.vercel.app",
+];
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
-  if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true }
+  if (whitelist.indexOf(req.header("Origin")) !== -1) {
+    corsOptions = { origin: true };
   } else {
-    corsOptions = { origin: false }
+    corsOptions = { origin: false };
   }
-  callback(null, corsOptions)
-}
+  callback(null, corsOptions);
+};
 
 // Express rate limit
 const limiter = rateLimit({
@@ -47,7 +53,7 @@ const limiter = rateLimit({
   message: "5 минутанд 3 удаа л хандаж болно!",
 });
 
-app.use(express.static('public'))
+app.use(express.static("public"));
 app.use(limiter);
 app.use(hpp());
 app.use(cookieParser());
@@ -59,7 +65,7 @@ app.use(helmet());
 app.use(xss());
 app.use(injectDb(db));
 app.use(morgan("combined", { stream: accessLogStream }));
-restServer.applyMiddleWare(app, '/api/v1')
+restServer.applyMiddleWare(app, "/api/v1");
 app.use(errorHandler);
 
 // Моделиудаас базыг үүсгэнэ (хэрэв үүсээгүй бол)
@@ -73,7 +79,9 @@ db.sequelize
 // express сэрвэрийг асаана.
 const server = app.listen(
   process.env.PORT,
-  console.log(`🚀 RESTful API is now running on http://localhost:${process.env.PORT}/api/v1`)
+  console.log(
+    `🚀 RESTful API is now running on http://localhost:${process.env.PORT}/api/v1`
+  )
 );
 
 // Баригдалгүй цацагдсан бүх алдаануудыг энд барьж авна
