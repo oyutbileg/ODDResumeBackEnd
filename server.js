@@ -17,9 +17,9 @@ const injectDb = require("./src/middleware/injectDb");
 
 const restServer = require("./src/routes");
 
-// dotenv.config({
-//   path: "./config.env",
-// });
+dotenv.config({
+  path: "./config.env",
+});
 
 const db = require("./src/config/db-seq");
 const app = express();
