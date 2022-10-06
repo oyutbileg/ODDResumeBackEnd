@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql
+    restart: always
+    env_file: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$SEQUELIZE_PASSWORD
+      - MYSQL_DATABASE=$SEQUELIZE_DATABASE
+    ports:
+      - 3307:3306
+    volumes:
+      - db:/var/lib/mysql
+  api:
+    depends_on:
+      - mysqldb
+    build: .
+    restart: always
+    env_file: ./.env
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/lib/docker/disk02:/api/public/upload
+    environment:
+      - DB_HOST=mysqldb
+      - DB_USER=$SEQUELIZE_USERNAME
+      - DB_PASSWORD=$SEQUELIZE_PASSWORD
+      - DB_NAME=$SEQUELIZE_DATABASE
+      - DB_PORT=3306
+    stdin_open: true
+    tty: true
+
+volumes: 
+  db:
