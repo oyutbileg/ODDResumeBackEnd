@@ -59,11 +59,11 @@ const limiter = rateLimit({
   message: "5 минутанд 3 удаа л хандаж болно!",
 });
 
+app.use('*', cors())
 app.use(express.static("public"));
 app.use(limiter);
 app.use(hpp());
 app.use(cookieParser());
-app.use(cors());
 app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
