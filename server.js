@@ -45,7 +45,6 @@ const corsOptionsDelegate = function (req, callback) {
     corsOptions = {
       origin: true,
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-      preflightContinue: true
     };
   } else {
     corsOptions = { origin: false };
