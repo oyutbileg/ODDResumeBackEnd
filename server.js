@@ -42,7 +42,11 @@ const whitelist = [
 const corsOptionsDelegate = function (req, callback) {
   var corsOptions;
   if (whitelist.indexOf(req.header("Origin")) !== -1) {
-    corsOptions = { origin: true };
+    corsOptions = {
+      origin: true,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      preflightContinue: false
+    };
   } else {
     corsOptions = { origin: false };
   }
