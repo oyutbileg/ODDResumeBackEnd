@@ -63,7 +63,7 @@ app.use(express.static("public"));
 app.use(limiter);
 app.use(hpp());
 app.use(cookieParser());
-app.use(cors(corsOptionsDelegate));
+app.use(cors());
 app.use(fileupload({ createParentPath: true }));
 app.use(express.json());
 app.use(logger);
