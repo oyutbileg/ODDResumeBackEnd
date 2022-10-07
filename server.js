@@ -59,20 +59,13 @@ const limiter = rateLimit({
   message: "5 минутанд 3 удаа л хандаж болно!",
 });
 
-app.use("*", cors());
-app.options("*", cors());
-app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
-  );
-  next();
-});
+const corsOptions = {
+  origin: "*",
+  optionsSuccessStatus: 200,
+};
+
+app.use("*", cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.static("public"));
 app.use(limiter);
 app.use(hpp());
