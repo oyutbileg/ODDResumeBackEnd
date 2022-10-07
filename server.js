@@ -67,7 +67,7 @@ const corsOptions = {
 app.use("*", cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(express.static("public"));
-app.use(limiter);
+// app.use(limiter);
 app.use(hpp());
 app.use(cookieParser());
 app.use(fileupload({ createParentPath: true }));
