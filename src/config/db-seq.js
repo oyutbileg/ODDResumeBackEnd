@@ -13,6 +13,11 @@ const sequelize = new Sequelize(
     host: process.env.SEQUELIZE_HOST,
     port: process.env.SEQUELIZE_PORT,
     dialect: process.env.SEQUELIZE_DIALECT,
+    dialectOptions: {
+        ssl: {
+            rejectUnauthorized: true,        
+        }
+    },
     define: {
       freezeTableName: true,
     },

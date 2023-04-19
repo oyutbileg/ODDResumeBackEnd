@@ -103,3 +103,5 @@ process.on("unhandledRejection", (err, _promise) => {
     process.exit(1);
   });
 });
+
+module.exports = app;
