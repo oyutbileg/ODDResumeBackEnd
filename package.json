@@ -12,6 +12,7 @@
     "build": "rm -rf ./dist && nodemon server.js"
   },
   "dependencies": {
+    "aws-sdk": "^2.1360.0",
     "axios": "^0.25.0",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",

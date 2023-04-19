@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const arrayRemoveElement = require("../utils/removePassword");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
+const { fileUpload } = require("../utils/fileUpload")
 
 exports.me = asyncHandler(async (req, res, _next) => {
   let select = req.query.select;
@@ -66,31 +67,15 @@ exports.uploadPhoto = asyncHandler(async (req, res, _next) => {
 
   const file = req.files['file']
 
-  if (!file.mimetype.startsWith("image")) {
-    throw new MyError("Та зураг upload хийнэ үү.", 400);
-  }
+  const result = await fileUpload(file, "", user.first_name.toLowerCase())
 
-  if (file.size > process.env.MAX_UPLOAD_FILE_SIZE) {
-    throw new MyError("Таны зурагны хэмжээ хэтэрсэн байна.", 400);
-  }
+  user.photo = result.key;
+  user.save();
 
-  file.name = `photo_${req.userId}${path.parse(file.name).ext}`;
-
-  file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, (err) => {
-    if (err) {
-      throw new MyError(
-        "Файлыг хуулах явцад алдаа гарлаа. Алдаа : " + err.message,
-      );
+  responseHandler(res, {
+    data: {
+      photo: result.key
     }
-
-    user.photo = file.name;
-    user.save();
-
-    responseHandler(res, {
-      data: {
-        photo: user.photo
-      }
-    });
   });
 });
 

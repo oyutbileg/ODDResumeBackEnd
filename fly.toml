@@ -1,4 +1,4 @@
-# fly.toml file generated for resume-api on 2023-04-18T17:35:04+08:00
+# fly.toml file generated for resume-api on 2023-04-19T12:56:28+08:00
 
 app = "resume-api"
 primary_region = "nrt"
