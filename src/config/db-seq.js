@@ -14,9 +14,7 @@ const sequelize = new Sequelize(
     port: process.env.SEQUELIZE_PORT,
     dialect: process.env.SEQUELIZE_DIALECT,
     dialectOptions: {
-        ssl: {
-            rejectUnauthorized: true,        
-        }
+      ssl: false 
     },
     define: {
       freezeTableName: true,
